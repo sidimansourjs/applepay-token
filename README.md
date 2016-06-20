@@ -69,7 +69,7 @@ Note: The SHA-256 hash function produces exactly the needed amount of key materi
 
 5.	Use the symmetric key to decrypt the value of the data key using AES–256 (id-aes256-GCM 2.16.840.1.101.3.4.1.46), with an initialization vector of sixteen null bytes and no associated authentication data. If the signature is invalid or any of the hashes don’t match, ignore the transaction.
 
-## Steps to decrypt payment data:
+## Nodejs steps to decrypt payment data:
  
 Summarizing, we need to generate a shared secret key using the ephemeral public key. Then we need to use this new shared secret to generate the symmetric key. Finally, the symmetric key will be using to decrypt the payment token.
 
