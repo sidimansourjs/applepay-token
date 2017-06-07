@@ -125,7 +125,8 @@ As described in the reference, the symmetric key is a `sha256` hash that contain
 	    	hash.update(new Buffer('000000', 'hex'));
 	    	hash.update(new Buffer('01', 'hex'));
 	    	hash.update(new Buffer(sharedSecret, 'hex'));
-	    	hash.update(KDF_INFO);
+	    	// From nodejs V6 use --> hash.update(KDF_INFO, 'binary');
+		hash.update(KDF_INFO);
 	
 		return hash.digest('hex');
 	}
