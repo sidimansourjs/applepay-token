@@ -37,9 +37,11 @@ Introduction
 
 ## Generate private key:
 
+After following all the required steps described at [apple developers site](https://developer.apple.com/documentation/passkit/apple_pay/setting_up_apple_pay_requirements)
+
 The process to get the private key is the standard in openssl
 
-You can export your private key doing the following steps:
+You can export your private key by following these steps:
 
 	- Export merchant certificate to a p12 cert (this format has the cert+private key).
 	- Open terminal, go to the folder that contains the p12
@@ -70,6 +72,11 @@ The pem file will look something like:
 This example is expecting the private key reduced to single line, you can use other implementations, in this case it would be:
 
 		MHcCAQEE234234234opsmasdsalsamdsad/asdsad/asdasd/asdAwEHoUQDQgAaslkdsad8asjdnlkm23leu9jclaskdas/masr4+/as34+4fh/sf64g/nX35fs5w==
+
+## Merchant ID:
+
+Merchant ID is the data of the extension 1.2.840.113635.100.6.32, which is the merchant identifier field (OID 1.2.840.113635.100.6.32). This an id extension of the certificate it’s not your merchant identifier.
+
 
 ## Steps to decrypt payment data:
 1. Verify the signature as follows:
