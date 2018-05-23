@@ -34,6 +34,43 @@ Introduction
 		- ````signature````: Signature of the payment and header data (detached PKCS \#7 signature, Base64 encoded as string).
 		- ````version````: Version information about the payment token (string).
 
+
+## Generate private key:
+
+The process to get the private key is the standard in openssl
+
+You can export your private key doing the following steps:
+
+	- Export merchant certificate to a p12 cert (this format has the cert+private key).
+	- Open terminal, go to the folder that contains the p12
+ 	- Use openssl to get the private key: 
+			openssl pkcs12 -in <yourcert_name>.p12 -out key.pem -nocerts -nodes   
+		This command will create a key.pem file with the content of your private key
+
+The pem file will look something like:
+
+		Bag Attributes
+
+		    friendlyName: John Doe
+
+		    localKeyID: E3 EE 3R 5T 43 ...
+
+		Key Attributes: <No Attributes>
+
+		-----BEGIN EC PRIVATE KEY-----
+
+		MHcCAQEE234234234opsmasdsalsamdsad/asdsad/asdasd/asd
+
+		AwEHoUQDQgAaslkdsad8asjdnlkm23leu9jclaskdas/m
+
+		asr4+/as34+4fh/sf64g/nX35fs5w==
+
+		-----END EC PRIVATE KEY-----
+
+This example is expecting the private key reduced to single line, you can use other implementations, in this case it would be:
+
+		MHcCAQEE234234234opsmasdsalsamdsad/asdsad/asdasd/asdAwEHoUQDQgAaslkdsad8asjdnlkm23leu9jclaskdas/masr4+/as34+4fh/sf64g/nX35fs5w==
+
 ## Steps to decrypt payment data:
 1. Verify the signature as follows:
 	1.	Ensure that the certificates contain the correct custom OIDs: 	
@@ -44,7 +81,9 @@ Introduction
 
 	2. Ensure that the root CA is the Apple Root CA - G3. This certificate is available from http://apple.com/certificateauthority.
 
-	3. Ensure that there is a valid X.509 chain of trust from the signature to the root CA. Specifically, ensure that the signature was created using the private key corresponding to the leaf certificate, that the leaf certificate is signed by the intermediate CA, and that the intermediate CA is signed by the Apple Root CA - G3.
+	3. Ensure that there is a valid X.509 chain of trust from the signature to the root CA. Specifically, ensure that the signature was created using the 
+	
+	key corresponding to the leaf certificate, that the leaf certificate is signed by the intermediate CA, and that the intermediate CA is signed by the Apple Root CA - G3.
 
 	4. Ensure that the signature is a valid ECDSA signature (ecdsa-with-SHA256 1.2.840.10045.4.3.2) of the concatenated values of the ephemeralPublicKey, data,transactionId, and applicationData keys.
 
