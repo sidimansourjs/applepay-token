@@ -116,12 +116,15 @@ Note: The SHA-256 hash function produces exactly the needed amount of key materi
 ## To Test
 Copy your private key PEM file and your Apple Pay certificate PEM file to the root directory of the project.
 
-> npm install
-> npm start
-> curl localhost:3000/decrypt
+		> npm install
+		> npm start
+		> curl localhost:3000/decrypt
 
-This will provide a decrypted token:
-{"applicationPrimaryAccountNumber":"410XXXXXXXXXXXX0","applicationExpirationDate":"200731","currencyCode":"840","transactionAmount":100,"deviceManufacturerIdentifier":"04001003027X","paymentDataType":"3DSecure","paymentData":{"onlinePaymentCryptogram":"Xf9x/QwAA/DjmU65oyc1MAABXXX=","eciIndicator":"5"}}
+This will provide a decrypted token:		
+
+		{"applicationPrimaryAccountNumber":"410XXXXXXXXXXXX0","applicationExpirationDate":"200731","currencyCode":"840",
+	"transactionAmount":100,"deviceManufacturerIdentifier":"04001003027X","paymentDataType":"3DSecure","paymentData":{"onlinePaymentCryptogram":"Xf9x/QwAA/DjmU65oyc1MAABXXX=","eciIndicator":"5"}
+	}
 
 ## Nodejs steps to decrypt payment data:
  
@@ -180,7 +183,7 @@ As described in the reference, the symmetric key is a `sha256` hash that contain
 	    	hash.update(new Buffer('01', 'hex'));
 	    	hash.update(new Buffer(sharedSecret, 'hex'));
 	    	// From nodejs V6 use --> hash.update(KDF_INFO, 'binary');
-		hash.update(KDF_INFO);
+		hash.update(KDF_INFO, 'binary');
 	
 		return hash.digest('hex');
 	}
