@@ -49,6 +49,9 @@ You can export your private key by following these steps:
 			openssl pkcs12 -in <yourcert_name>.p12 -out key.pem -nocerts -nodes   
 		This command will create a key.pem file with the content of your private key
 
+See this link for more information
+	https://aaronmastsblog.com/blog/apple-pay-certificates/
+
 The pem file will look something like:
 
 		Bag Attributes
@@ -126,7 +129,7 @@ Summarizing, we need to generate a shared secret key using the ephemeral public 
     let simetricKey = generateSymmetricKey(merchantId, sharedSecret);
 
     // Decrypt Cipher text
-    let decrypted = decryptCiphertext(simetricKey, IV, ciphertext);
+    let decrypted = decryptCiphertext(simetricKey, ciphertext);
 
 ### 1. Create a function to generate the shared secret. 
 
@@ -153,7 +156,7 @@ After creating the Elliptic Curve object we can assign the merchant private key 
 		        return e;
 		      }
 		
-			return om;
+		      return om;
 		}
 
 ### 2. Create a symmetric key
@@ -189,7 +192,7 @@ Creates and returns a Decipher object that uses the given algorithm and password
 The implementation of crypto.createDecipher() derives keys using the OpenSSL function EVP_BytesToKey with the digest algorithm set to MD5, one iteration, and no salt. The lack of salt allows dictionary attacks as the same password always creates the same key. The low iteration count and non-cryptographically secure hash algorithm allow passwords to be tested very rapidly.
 
 
-	function decryptCiphertext (symmetricKey, iv, ciphertext) {
+	function decryptCiphertext (symmetricKey, ciphertext) {
 		const
 	        SYMMETRIC_KEY = forge.util.createBuffer((new Buffer(symmetricKey, 'hex')).toString('binary')),
 		      IV = forge.util.createBuffer((new Buffer([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])).toString('binary')),
