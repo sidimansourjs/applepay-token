@@ -95,6 +95,8 @@ app.get('/decrypt', function(req, res) {
 
   // Decrypt Cipher text
   let decrypted = decryptCiphertext(symmetricKey, ciphertext);
+
+  //TODO: Determine if -14 is correct, my decrypted string had extra junk at the end.  Not sure if this will apply to all tokens.
   var decryptedClean = decrypted.slice(0, -14);
   console.log(decryptedClean);
 });
