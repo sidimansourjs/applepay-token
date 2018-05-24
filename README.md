@@ -52,24 +52,18 @@ You can export your private key by following these steps:
 See this link for more information
 	https://aaronmastsblog.com/blog/apple-pay-certificates/
 
+Save the PEM version of your Apple Pay Certificate and your Private Key in the root directory of the project.
+
 The pem file will look something like:
 
 		Bag Attributes
-
 		    friendlyName: John Doe
-
 		    localKeyID: E3 EE 3R 5T 43 ...
-
 		Key Attributes: <No Attributes>
-
 		-----BEGIN EC PRIVATE KEY-----
-
 		MHcCAQEE234234234opsmasdsalsamdsad/asdsad/asdasd/asd
-
 		AwEHoUQDQgAaslkdsad8asjdnlkm23leu9jclaskdas/m
-
 		asr4+/as34+4fh/sf64g/nX35fs5w==
-
 		-----END EC PRIVATE KEY-----
 
 This example is expecting the private key reduced to single line, you can use other implementations, in this case it would be:
@@ -80,6 +74,7 @@ This example is expecting the private key reduced to single line, you can use ot
 
 Merchant ID is the data of the extension 1.2.840.113635.100.6.32, which is the merchant identifier field (OID 1.2.840.113635.100.6.32). This an id extension of the certificate it’s not your merchant identifier.
 
+In our working example, we parse the certificate with the x509 NPM package.
 
 ## Steps to decrypt payment data:
 1. Verify the signature as follows:
@@ -118,11 +113,21 @@ Note: The SHA-256 hash function produces exactly the needed amount of key materi
 
 5.	Use the symmetric key to decrypt the value of the data key using AES–256 (id-aes256-GCM 2.16.840.1.101.3.4.1.46), with an initialization vector of sixteen null bytes and no associated authentication data. If the signature is invalid or any of the hashes don’t match, ignore the transaction.
 
+## To Test
+Copy your private key PEM file and your Apple Pay certificate PEM file to the root directory of the project.
+
+> npm install
+> npm start
+> curl localhost:3000/decrypt
+
+This will provide a decrypted token:
+{"applicationPrimaryAccountNumber":"410XXXXXXXXXXXX0","applicationExpirationDate":"200731","currencyCode":"840","transactionAmount":100,"deviceManufacturerIdentifier":"04001003027X","paymentDataType":"3DSecure","paymentData":{"onlinePaymentCryptogram":"Xf9x/QwAA/DjmU65oyc1MAABXXX=","eciIndicator":"5"}}
+
 ## Nodejs steps to decrypt payment data:
  
 Summarizing, we need to generate a shared secret key using the ephemeral public key. Then we need to use this new shared secret to generate the symmetric key. Finally, the symmetric key will be using to decrypt the payment token.
 
-	//Generating shared Secret
+    //Generating shared Secret
     let sharedSecret = generateSharedSecret(merchantPrivateKey, ephemeralPublicKey);
 
     //Generating simetric Key'
@@ -222,5 +227,3 @@ The implementation of crypto.createDecipher() derives keys using the OpenSSL fun
 		},
 		"data":"IaD7LKDbJsOrGTlNGkKUC95Y+4an2YuN0swstaCaoovlj8dbgf16FmO5j4AX80L0xsRQYKLUpgUHbGoYF26PbraIdZUDtPtja4HdqDOXGESQGsAKCcRIyujAJpFv95+5xkNldDKK2WTe28lHUDTA9bykIgrvasYaN9VWnS92i2CZPpsI7yu13Kk3PrUceuA3Fb6wFgJ0l7HXL1RGhrA7V5JKReo/EwikMsK8AfChK7pvWaB51SsMvbMJF28JnincfVX39vYHdzEwpjSPngNiszGqZGeLdqNE3ngkoEK1AW2ymbYkIoy9KFdXayekELR6hQWnL4MCutLesLjKhyTN26fxBamPHzAf/IczAdWBDq2P/59jheIGrnK30slJJcr1Bocb8rqojyaVZIY+Xk24Nc6dvSdJhfDDyhX56pn5YtWOxWuVOT0tZSJvxBN/HeIuYcNG6R9u7CHpcelsi4I8O+1gruKKZQHweERG2DyCmoUO9zlajOSm"
 	}
-
-            
