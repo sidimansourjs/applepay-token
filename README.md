@@ -49,24 +49,21 @@ You can export your private key by following these steps:
 			openssl pkcs12 -in <yourcert_name>.p12 -out key.pem -nocerts -nodes   
 		This command will create a key.pem file with the content of your private key
 
+See this link for more information
+	https://aaronmastsblog.com/blog/apple-pay-certificates/
+
+Save the PEM version of your Apple Pay Certificate and your Private Key in the root directory of the project.
+
 The pem file will look something like:
 
 		Bag Attributes
-
 		    friendlyName: John Doe
-
 		    localKeyID: E3 EE 3R 5T 43 ...
-
 		Key Attributes: <No Attributes>
-
 		-----BEGIN EC PRIVATE KEY-----
-
 		MHcCAQEE234234234opsmasdsalsamdsad/asdsad/asdasd/asd
-
 		AwEHoUQDQgAaslkdsad8asjdnlkm23leu9jclaskdas/m
-
 		asr4+/as34+4fh/sf64g/nX35fs5w==
-
 		-----END EC PRIVATE KEY-----
 
 This example is expecting the private key reduced to single line, you can use other implementations, in this case it would be:
@@ -77,6 +74,7 @@ This example is expecting the private key reduced to single line, you can use ot
 
 Merchant ID is the data of the extension 1.2.840.113635.100.6.32, which is the merchant identifier field (OID 1.2.840.113635.100.6.32). This an id extension of the certificate it’s not your merchant identifier.
 
+In our working example, we parse the certificate with the x509 NPM package.
 
 ## Steps to decrypt payment data:
 1. Verify the signature as follows:
@@ -115,18 +113,31 @@ Note: The SHA-256 hash function produces exactly the needed amount of key materi
 
 5.	Use the symmetric key to decrypt the value of the data key using AES–256 (id-aes256-GCM 2.16.840.1.101.3.4.1.46), with an initialization vector of sixteen null bytes and no associated authentication data. If the signature is invalid or any of the hashes don’t match, ignore the transaction.
 
+## To Test
+Copy your private key PEM file and your Apple Pay certificate PEM file to the root directory of the project.
+
+		> npm install
+		> npm start
+		> curl localhost:3000/decrypt
+
+This will provide a decrypted token:		
+
+		{"applicationPrimaryAccountNumber":"410XXXXXXXXXXXX0","applicationExpirationDate":"200731","currencyCode":"840",
+	"transactionAmount":100,"deviceManufacturerIdentifier":"04001003027X","paymentDataType":"3DSecure","paymentData":{"onlinePaymentCryptogram":"Xf9x/QwAA/DjmU65oyc1MAABXXX=","eciIndicator":"5"}
+	}
+
 ## Nodejs steps to decrypt payment data:
  
 Summarizing, we need to generate a shared secret key using the ephemeral public key. Then we need to use this new shared secret to generate the symmetric key. Finally, the symmetric key will be using to decrypt the payment token.
 
-	//Generating shared Secret
+    //Generating shared Secret
     let sharedSecret = generateSharedSecret(merchantPrivateKey, ephemeralPublicKey);
 
     //Generating simetric Key'
     let simetricKey = generateSymmetricKey(merchantId, sharedSecret);
 
     // Decrypt Cipher text
-    let decrypted = decryptCiphertext(simetricKey, IV, ciphertext);
+    let decrypted = decryptCiphertext(simetricKey, ciphertext);
 
 ### 1. Create a function to generate the shared secret. 
 
@@ -153,7 +164,7 @@ After creating the Elliptic Curve object we can assign the merchant private key 
 		        return e;
 		      }
 		
-			return om;
+		      return om;
 		}
 
 ### 2. Create a symmetric key
@@ -172,7 +183,7 @@ As described in the reference, the symmetric key is a `sha256` hash that contain
 	    	hash.update(new Buffer('01', 'hex'));
 	    	hash.update(new Buffer(sharedSecret, 'hex'));
 	    	// From nodejs V6 use --> hash.update(KDF_INFO, 'binary');
-		hash.update(KDF_INFO);
+		hash.update(KDF_INFO, 'binary');
 	
 		return hash.digest('hex');
 	}
@@ -189,7 +200,7 @@ Creates and returns a Decipher object that uses the given algorithm and password
 The implementation of crypto.createDecipher() derives keys using the OpenSSL function EVP_BytesToKey with the digest algorithm set to MD5, one iteration, and no salt. The lack of salt allows dictionary attacks as the same password always creates the same key. The low iteration count and non-cryptographically secure hash algorithm allow passwords to be tested very rapidly.
 
 
-	function decryptCiphertext (symmetricKey, iv, ciphertext) {
+	function decryptCiphertext (symmetricKey, ciphertext) {
 		const
 	        SYMMETRIC_KEY = forge.util.createBuffer((new Buffer(symmetricKey, 'hex')).toString('binary')),
 		      IV = forge.util.createBuffer((new Buffer([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])).toString('binary')),
@@ -220,4 +231,4 @@ The implementation of crypto.createDecipher() derives keys using the OpenSSL fun
 		"data":"IaD7LKDbJsOrGTlNGkKUC95Y+4an2YuN0swstaCaoovlj8dbgf16FmO5j4AX80L0xsRQYKLUpgUHbGoYF26PbraIdZUDtPtja4HdqDOXGESQGsAKCcRIyujAJpFv95+5xkNldDKK2WTe28lHUDTA9bykIgrvasYaN9VWnS92i2CZPpsI7yu13Kk3PrUceuA3Fb6wFgJ0l7HXL1RGhrA7V5JKReo/EwikMsK8AfChK7pvWaB51SsMvbMJF28JnincfVX39vYHdzEwpjSPngNiszGqZGeLdqNE3ngkoEK1AW2ymbYkIoy9KFdXayekELR6hQWnL4MCutLesLjKhyTN26fxBamPHzAf/IczAdWBDq2P/59jheIGrnK30slJJcr1Bocb8rqojyaVZIY+Xk24Nc6dvSdJhfDDyhX56pn5YtWOxWuVOT0tZSJvxBN/HeIuYcNG6R9u7CHpcelsi4I8O+1gruKKZQHweERG2DyCmoUO9zlajOSm"
 	}
 
-            
+Huge thank you to murcialito for providing all of the hard parts of this in his repo.
